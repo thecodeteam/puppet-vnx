@@ -4,6 +4,30 @@ Puppet modules are reusable, sharable units of Puppet code. Modules are used to 
 Puppet VNX Module
 Puppet VNX module wraps Naviseccli into Puppet module to simplify the configuration of VNX Initiator, DNS, Storage Pool, Hot Spare, Storage Group, LUN, Fast Cache, NTP, Domain, SP and Array.
 
+Prepare
+-------
+Download and install Navisphere CLI
+For VNX1 Series: https://support.emc.com/downloads/12781_VNX1-Series
+For VNX2 Series: https://support.emc.com/downloads/36656_VNX2-Series
+
+Example
+-------
+```puppet
+transport {'vnx5400':
+  username => 'nasadmin',
+  password => 'nasadmin',
+  server   => '10.10.166.9'
+}
+
+vnx_storagepool {"elc-cloud":
+  disks => ['0_0_4', '0_0_5', '0_0_6', '0_0_7', '0_0_8'],
+  raid_type => 'r_5',
+  transport => Transport['vnx5400'],
+  ensure => present
+}
+```
+Notice: Type parameters refer to Navisphere CLI parameters
+
 
 TO DO
 -------
