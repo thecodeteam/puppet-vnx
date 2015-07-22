@@ -1,13 +1,12 @@
-Puppet Module
-Puppet modules are reusable, sharable units of Puppet code. Modules are used to extend Puppet across IT infrastructure by automating tasks such as setting up a database, web server, or mail server.
-
-Puppet VNX Module
+#Puppet VNX Module
 Puppet VNX module wraps Naviseccli into Puppet module to simplify the configuration of VNX Initiator, DNS, Storage Pool, Hot Spare, Storage Group, LUN, Fast Cache, NTP, Domain, SP and Array.
 
 Prepare
 -------
 Download and install Navisphere CLI
+
 For VNX1 Series: https://support.emc.com/downloads/12781_VNX1-Series
+
 For VNX2 Series: https://support.emc.com/downloads/36656_VNX2-Series
 
 Example
