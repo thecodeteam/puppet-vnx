@@ -13,7 +13,7 @@ Puppet::Type.newtype(:vnx_storagepool) do
 
   newproperty(:disks, :array_matching => :all) do
     desc "The disks to add to the storage pool."
-    validate do |value|
+    validate do |*value|
       fail ("Invalid format for disks") unless value.all?{|v| v =~ /\A\d+\_\d+\_\d+\z/}
     end
 
