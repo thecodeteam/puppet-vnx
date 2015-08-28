@@ -152,11 +152,6 @@ Puppet::Type.type(:vnx_nqm).provide(:vnx_nqm) do
   #  ioclass_list = get_file_as_string(f_name)
   #  ioclass_list = ioclass_list.gsub("\n", ' ')
     args = ['nqm', '-policy', '-create', '-name', resource[:policy_name], '-ioclasses', *$ioClass]
-    #args << "-ioclasses" << ioclass_list
-    #puts "wzz debug #{$ioClass.join(' ')}"
-    #puts "wzz debug #{args}"
-    #args << "-ioclasses" << $ioClass.join(' ')
-    #puts "wzz debug #{args}"
     args << "-failaction" << resource[:fail_action]
     run(args)
     @property_hash[:ensure] = :present
