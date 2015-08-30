@@ -1,5 +1,5 @@
 Puppet::Type.newtype(:vnx_nqm) do
-  @doc = "Manage EMC VNX LUNs."
+  @doc = "Manage EMC VNX Qos Settings."
 
   ensurable
 
