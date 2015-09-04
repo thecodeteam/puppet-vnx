@@ -88,91 +88,106 @@ Puppet::Type.type(:vnx_storagepool).provide(:vnx_storagepool) do
         sp_info[:current_operation_percent_completed] = value
       end
 
-      if (pattern = 'Raw Capacity (Blocks):') && line.start_with?(pattern)
+      pattern = 'Raw Capacity (Blocks):'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:raw_capacity_blocks] = value
         next
       end
 
-      if (pattern = 'Raw Capacity (GBs):') && line.start_with?(pattern)
+      pattern = 'Raw Capacity (GBs):'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:raw_capacity_gbs] = value
         next
       end
 
-      if (pattern = 'User Capacity (Blocks):') && line.start_with?(pattern)
+      pattern = 'User Capacity (Blocks):'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:user_capacity_blocks] = value
         next
       end
 
-      if (pattern = 'User Capacity (GBs):') && line.start_with?(pattern)
+      pattern = 'User Capacity (GBs):'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:user_capacity_gbs] = value
         next
       end
 
-      if (pattern = 'Consumed Capacity (Blocks):') && line.start_with?(pattern)
+      pattern = 'Consumed Capacity (Blocks):'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:consumed_capacity_blocks] = value
         next
       end
 
-      if (pattern = 'Consumed Capacity (GBs):') && line.start_with?(pattern)
+      pattern = 'Consumed Capacity (GBs):'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:consumed_capacity_gbs] = value
         next
       end
 
-      if (pattern = 'Available Capacity (Blocks):') && line.start_with?(pattern)
+      pattern = 'Available Capacity (Blocks):'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:available_capacity_blocks] = value
         next
       end
 
-      if (pattern = 'Available Capacity (GBs):') && line.start_with?(pattern)
+      pattern = 'Available Capacity (GBs):'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:available_capacity_gbs] = value
         next
       end
 
-      if (pattern = 'Percent Full:') && line.start_with?(pattern)
+      pattern = 'Percent Full:'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:percent_full] = value
         next
       end
 
-      if (pattern = 'Total Subscribed Capacity (Blocks):') && line.start_with?(pattern)
+      pattern = 'Total Subscribed Capacity (Blocks):'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:total_subscribed_capacity_blocks] = value
         next
       end
 
-      if (pattern = 'Total Subscribed Capacity (GBs):') && line.start_with?(pattern)
+      pattern = 'Total Subscribed Capacity (GBs):'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:total_subscribed_capacity_gbs] = value
         next
       end
 
-      if (pattern = 'Percent Subscribed:') && line.start_with?(pattern)
+      pattern = 'Percent Subscribed:'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:percent_subscribed] = value
         next
       end
 
-      if (pattern = 'Oversubscribed by (Blocks):') && line.start_with?(pattern)
+      pattern = 'Oversubscribed by (Blocks):'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:oversubscribed_by_blocks] = value
         next
       end
 
-      if (pattern = 'Oversubscribed by (GBs):') && line.start_with?(pattern)
+      pattern = 'Oversubscribed by (GBs):'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:oversubscribed_by_gbs] = value
         next
       end
 
-      if (pattern = 'Disks:') && line.start_with?(pattern)
+      pattern = 'Disks:'
+      if line.start_with?(pattern)
         disks = []
         while /Bus (\d+) Enclosure (\d+) Disk (\d+)/ =~ sp_lines.first
           sp_lines.shift
@@ -182,7 +197,8 @@ Puppet::Type.type(:vnx_storagepool).provide(:vnx_storagepool) do
         next
       end
 
-      if (pattern = 'LUNs:') && line.start_with?(pattern)
+      pattern = 'LUNs:'
+      if line.start_with?(pattern)
         value = line.gsub(pattern, '').strip
         sp_info[:luns] = value.split(",").map{|v| v.strip.to_i}
         next

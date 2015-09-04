@@ -27,22 +27,26 @@ Puppet::Type.type(:vnx_lun).provide(:vnx_lun) do
   def self.get_lun_properties lun_info
     lun = {}
     lun_info.split("\n").each do |line|
-      if (pattern = "LOGICAL UNIT NUMBER") && line.start_with?(pattern)
+      pattern = "LOGICAL UNIT NUMBER"
+      if line.start_with?(pattern)
         lun[:lun_number] = line.sub(pattern, "").strip.to_i
         next
       end
 
-      if (pattern = "Name:") && line.start_with?(pattern)
+      pattern = "Name:"
+      if line.start_with?(pattern)
         lun[:name] = line.sub(pattern, "").strip
         next
       end
 
-      if (pattern = "UID:") && line.start_with?(pattern)
+      pattern = "UID:"
+      if line.start_with?(pattern)
         lun[:uid] = line.sub(pattern, "").strip
         next
       end
 
-      if (pattern = "Current Owner:") && line.start_with?(pattern)
+      pattern = "Current Owner:"
+      if line.start_with?(pattern)
         owner = line.sub(pattern, "").strip
         owner = if owner == "SP A"
           :a
@@ -55,7 +59,8 @@ Puppet::Type.type(:vnx_lun).provide(:vnx_lun) do
         next
       end
 
-      if (pattern = "Default Owner:") && line.start_with?(pattern)
+      pattern = "Default Owner:"
+      if line.start_with?(pattern)
         owner = line.sub(pattern, "").strip
         owner = if owner == "SP A"
           :a
@@ -68,7 +73,8 @@ Puppet::Type.type(:vnx_lun).provide(:vnx_lun) do
         next
       end
 
-      if (pattern = "Allocation Owner:") && line.start_with?(pattern)
+      pattern = "Allocation Owner:"
+      if line.start_with?(pattern)
         owner = line.sub(pattern, "").strip
         owner = if owner == "SP A"
           :a
@@ -81,60 +87,71 @@ Puppet::Type.type(:vnx_lun).provide(:vnx_lun) do
         next
       end
 
-      if (pattern = "User Capacity (Blocks):") && line.start_with?(pattern)
+      pattern = "User Capacity (Blocks):"
+      if line.start_with?(pattern)
         lun[:user_capacity_blocks] = line.sub(pattern, "").strip.to_i
         next
       end
 
-      if (pattern = /\AUser Capacity \((\w+)\):(.+)/) && line =~ pattern
+      pattern = /\AUser Capacity \((\w+)\):(.+)/
+      if line =~ pattern
         lun[:capacity] = $2.strip.to_i
         sq = $1.downcase
         lun[:size_qual] = [:gb, :tb, :mb, :bc].find{|v| sq.include? v.to_s}
         next
       end
 
-      if (pattern = "Consumed Capacity (Blocks):") && line.start_with?(pattern)
+      pattern = "Consumed Capacity (Blocks):"
+      if line.start_with?(pattern)
         lun[:consumed_capacity_blocks] = line.sub(pattern, "").strip.to_i
         next
       end
 
-      if (pattern = /\AConsumed Capacity \((\w+)\):(.+)/) && line =~ pattern
+      pattern = /\AConsumed Capacity \((\w+)\):(.+)/
+      if line =~ pattern
         lun[:consumed_capacity] = $2.strip.to_f
         next
       end
 
-      if (pattern = "Pool Name:") && line.start_with?(pattern)
+      pattern = "Pool Name:"
+      if line.start_with?(pattern)
         lun[:pool_name] = line.sub(pattern, "").strip
         next
       end
 
-      if (pattern = "Offset:") && line.start_with?(pattern)
+      pattern = "Offset:"
+      if line.start_with?(pattern)
         lun[:offset] = line.sub(pattern, "").strip.to_i
         next
       end
 
-      if (pattern = "Auto-Assign Enabled:") && line.start_with?(pattern)
+      pattern = "Auto-Assign Enabled:"
+      if line.start_with?(pattern)
         lun[:auto_assign] = (line.sub(pattern, "").strip == "DISABLED" ? :false : :true)
         next
       end
 
-      if (pattern = "Raid Type:") && line.start_with?(pattern)
+      pattern = "Raid Type:"
+      if line.start_with?(pattern)
         lun[:raid_type] = line.sub(pattern, "").strip
         next
       end
 
-      if (pattern = "Is Pool LUN:") && line.start_with?(pattern)
+      pattern = "Is Pool LUN:"
+      if line.start_with?(pattern)
         lun[:is_pool_lun] = (line.sub(pattern, "").strip == "Yes" ? :true : :false)
         next
       end
 
-      if (pattern = "Is Thin LUN:") && line.start_with?(pattern)
+      pattern = "Is Thin LUN:"
+      if line.start_with?(pattern)
         lun[:is_thin_lun] = (line.sub(pattern, "").strip == "Yes" ? :true : :false)
         lun[:type] = (lun[:is_thin_lun] == :true ? :thin : :nonthin)
         next
       end
 
-      if (pattern = "Tiering Policy:") && line.start_with?(pattern)
+      pattern = "Tiering Policy:"
+      if line.start_with?(pattern)
         result = line.sub(pattern, "").strip.downcase
         result = if result.include? "auto"
                     :auto_tier
@@ -149,7 +166,8 @@ Puppet::Type.type(:vnx_lun).provide(:vnx_lun) do
         next
       end
 
-      if (pattern = "Initial Tier:") && line.start_with?(pattern)
+      pattern = "Initial Tier:"
+      if line.start_with?(pattern)
         result = line.sub(pattern, "").strip.downcase
         result = if result.include? "highest"
                     :highest_available
