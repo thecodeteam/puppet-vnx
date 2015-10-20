@@ -46,7 +46,7 @@ Puppet::Type.newtype(:vnx_storagepool) do
     end
   end
 
-  newproperty(:percent_full_threshhold) do
+  newproperty(:percent_full_threshold) do
     desc "The percent full before alerts are generated"
     validate do |value|
       fail("Non-integer value specified") unless value.is_a? Integer
