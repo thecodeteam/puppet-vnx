@@ -20,7 +20,7 @@ Puppet::Type.type(:vnx_lun).provide(:vnx_lun) do
   end
 
   def get_current_properties
-    lun_info = run(["lun", "-list", "-name", resource[:name]])
+    lun_info = run(["lun", "-list", "-name", resource[:lun_name]])
     self.class.get_lun_properties lun_info
   end
 
@@ -209,7 +209,7 @@ Puppet::Type.type(:vnx_lun).provide(:vnx_lun) do
 
   def set_lun
     # expand
-    args = ["lun", "-expand", "-name", resource[:name]]
+    args = ["lun", "-expand", "-name", resource[:lun_name]]
     origin_length = args.length
     args << "-capacity" << resource[:capacity] if @property_flush[:capacity]
     args << "-sq" << resource[:size_qual] if @property_flush[:size_qual]
@@ -218,10 +218,10 @@ Puppet::Type.type(:vnx_lun).provide(:vnx_lun) do
     run(args) if args.length > origin_length + 1
 
     # modify
-    args = ["lun", "-modify", "-name", resource[:name]]
+    args = ["lun", "-modify", "-name", resource[:lun_name]]
     origin_length = args.length
     args << "-aa" << (resource[:auto_assign] == :true ? 1 : 0) if @property_flush[:auto_assign]
-    args << "-newName" << resource[:new_name] if @property_flush[:new_name] && (@property_flush[:new_name] != resource[:name])
+    args << "-newName" << resource[:new_name] if @property_flush[:new_name] && (@property_flush[:new_name] != resource[:lun_name])
     args << "-sp" << resource[:default_owner].to_s.upcase if @property_flush[:default_owner]
     args << "-tieringPolicy" << (case resource[:tiering_policy]
     when :no_movement then "noMovement"
@@ -255,7 +255,7 @@ Puppet::Type.type(:vnx_lun).provide(:vnx_lun) do
       args << "-primaryLunName" << resource[:primary_lun_name] if resource[:primary_lun_name]
       args << "-sp" << resource[:default_owner].to_s.upcase if resource[:default_owner]
       args << "-l" << resource[:lun_number] if resource[:lun_number]
-      args << "-name" << resource[:name] if resource[:name]
+      args << "-name" << resource[:lun_name] if resource[:lun_name]
       args << "-allowSnapAutoDelete" << (resource[:allow_snap_auto_delete] == :true ? "yes" : "no") if resource[:allow_snap_auto_delete]
       args << "-allowInbandSnapAttach" << (resource[:allow_inband_snap_attach] == :true ? "yes" : "no") if resource[:allow_inband_snap_attach]
     else
@@ -266,7 +266,7 @@ Puppet::Type.type(:vnx_lun).provide(:vnx_lun) do
       args << "-sp" << resource[:default_owner].to_s.upcase if resource[:default_owner]
       args << "-aa" << (resource[:auto_assign] == :true ? 1 : 0) if resource[:auto_assign]
       args << "-l" << resource[:lun_number] if resource[:lun_number]
-      args << "-name" << resource[:name]
+      args << "-name" << resource[:lun_name]
       args << "-offset" << resource[:offset] if resource[:offset]
       args << "-tieringPolicy" << (case resource[:tiering_policy]
       when :no_movement then "noMovement"
@@ -302,7 +302,7 @@ Puppet::Type.type(:vnx_lun).provide(:vnx_lun) do
     # destroy
     if @property_flush[:ensure] == :absent
       args = ["lun", "-destroy"]
-      args << "-name" << resource[:name]
+      args << "-name" << resource[:lun_name]
       args << "-o"
       run args
       @property_hash[:ensure] = :absent

@@ -26,17 +26,40 @@ Puppet::Type.type(:vnx_storagegroup).provide(:vnx_storagegroup) do
     # rescue
     #   run ["lun", "-create", "-l", alu]
     # end
-    args = ["storagegroup", "-addhlu", "-gname", resource[:name], "-hlu", hlu, "-alu", alu]
+    args = ["storagegroup", "-addhlu", "-gname", resource[:sg_name], "-hlu", hlu, "-alu", alu]
+#    puts "#{args}"
     run args
   end
 
   def removehlu hlu
-    args = ["storagegroup", "-removehlu", "-gname", resource[:name], "-hlu", hlu, "-o"]
+    args = ["storagegroup", "-removehlu", "-gname", resource[:sg_name], "-hlu", hlu, "-o"]
+    run args
+  end
+
+  def setpath
+    args = ["storagegroup", "-setpath", "-o"]
+    args << "-gname" << resource[:sg_name] if resource[:sg_name]
+    args << "-hbauid" << resource[:hbauid]
+    args << "-sp" << resource[:sp]
+    args << "-spport" << resource[:sp_port]
+    args << "-spvport" << resource[:sp_vport] if resource[:sp_vport]
+    args << "-type" << resource[:initiator_type] if resource[:initiator_type]
+    args << "-ip" << resource[:ip_address] if resource[:ip_address]
+    args << "-host" << resource[:hostname] if resource[:hostname]
+    args << "-failovermode" << resource[:failover_mode] if resource[:failover_mode]
+    args << "-arraycommpath" << resource[:array_commpath] if resource[:array_commpath]
+    args << "-unitserialnumber" << resource[:unit_serialnumber] if resource[:unit_serialnumber]
+    run args
+#    @property_hash[:ensure] = :present
+  end
+
+  def addhost
+    args = ["storagegroup", "-connecthost", "-host", resource[:host_name], "-gname", resource[:sg_name], "-o"]
     run args
   end
 
   def get_current_properties
-    sg = run(["storagegroup", "-list", "-gname", resource[:name]])
+    sg = run(["storagegroup", "-list", "-gname", resource[:sg_name]])
     self.class.get_storagegroup_properties sg
   end
 
@@ -46,7 +69,7 @@ Puppet::Type.type(:vnx_storagegroup).provide(:vnx_storagegroup) do
       storage_group = {}
       while line_value = line_values.shift
         if line_value.start_with?('Storage Group Name:')
-          storage_group[:name] = line_value[(line_value.index(":") + 1)..-1].strip
+          storage_group[:sg_name] = line_value[(line_value.index(":") + 1)..-1].strip
           next
         end
 
@@ -167,7 +190,7 @@ Puppet::Type.type(:vnx_storagegroup).provide(:vnx_storagegroup) do
   # end
 
   def create_storagegroup
-    run(["storagegroup", "-create", "-gname", resource[:name]])
+    run(["storagegroup", "-create", "-gname", resource[:sg_name]])
     set_storagegroup
     @property_hash[:ensure] = :present
   end
@@ -191,23 +214,61 @@ Puppet::Type.type(:vnx_storagegroup).provide(:vnx_storagegroup) do
                   else
                     current_pairs.map{|pair| pair.values_at('hlu', 'alu').map &:to_s}.sort
                   end
-      remove_pairs = is_pairs - should_pairs
-      remove_pairs.each{|hlu, alu| removehlu hlu}
+#      remove_pairs = is_pairs - should_pairs
+#      remove_pairs.each{|hlu, alu| removehlu hlu}
       add_pairs = should_pairs - is_pairs
       add_pairs.each{|hlu, alu| addhlu hlu, alu}
     end
 
-    if @property_flush[:new_name] && (@property_flush[:new_name] != resource[:name])
-      args = ["storagegroup", "-chgname", "-gname", resource[:name], "-newgname", @property_flush[:new_name], "-o"]
+    #set the initiator path
+    if @property_flush[:hbauid]
+        #hostname = resource[:hbauid]
+#        puts "tohdat debug: property_flush #{@property_flush[:hbauid]}"
+#        puts "tohdat debug: #{@property_flush[:addonly]}"
+        if @property_flush[:setpathonly] == :true
+            args = ["storagegroup", "-setpath", "-o"]
+            args << "-gname" << resource[:sg_name] if resource[:sg_name]
+            args << "-hbauid" << resource[:hbauid]
+            args << "-sp" << resource[:sp]
+            args << "-spport" << resource[:sp_port]
+            args << "-spvport" << resource[:sp_vport] if resource[:sp_vport]
+            args << "-type" << resource[:initiator_type] if resource[:initiator_type]
+            args << "-ip" << resource[:ip_address] if resource[:ip_address]
+            args << "-host" << resource[:hostname] if resource[:hostname]
+            args << "-failovermode" << resource[:failover_mode] if resource[:failover_mode]
+            args << "-arraycommpath" << resource[:array_commpath] if resource[:array_commpath]
+            args << "-unitserialnumber" << resource[:unit_serialnumber] if resource[:unit_serialnumber]
+#            puts "tohdat debug: running args...#{args}"
+            run args
+        end
+    end
+
+    #change the hosts
+    if @property_flush[:host_name]
+        #hostname = resource[:host_name]
+        puts "wzz debug: property_flush #{@property_flush[:host_name]}"
+        puts "wzz debug: #{@property_flush[:addonly]}"
+        if @property_flush[:addonly] == :true
+            args = ["storagegroup", "-connecthost", "-host", resource[:host_name], "-gname", resource[:sg_name], "-o"]
+            puts "wzz debug: running args...#{args}"
+            run args
+        end
+    end
+
+
+
+    #change the storage group name
+    if @property_flush[:new_name] && (@property_flush[:new_name] != resource[:sg_name])
+      args = ["storagegroup", "-chgname", "-gname", resource[:sg_name], "-newgname", @property_flush[:new_name], "-o"]
       run args
-      resource[:name] = @property_flush[:new_name]
+      resource[:sg_name] = @property_flush[:new_name]
     end
   end
 
   def flush
     # destroy
     if @property_flush[:ensure] == :absent
-      run(["storagegroup", "-destroy", "-gname", resource[:name], "-o"])
+      run(["storagegroup", "-destroy", "-gname", resource[:sg_name], "-o"])
       @property_hash[:ensure] = :absent
       return
     end

@@ -7,6 +7,19 @@ Puppet::Type.newtype(:vnx_initiator) do
     desc "The HBA UID for an Initiator"
   end
 
+  newparam(:hba_uid) do
+    desc "The HBA UID for an Initiator not name"
+  end
+
+  newproperty(:failovermode) do
+  	desc "failover mode"
+  end
+  
+  newproperty(:arraycommpath) do
+  	desc "Array Comm Path"
+  end
+
+
   newproperty(:hostname) do
     desc "The host name of virtual machine"
   end
