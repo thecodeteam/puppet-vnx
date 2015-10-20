@@ -1,309 +1,313 @@
-Puppet::Type.newtype(:vnx_storagepool) do
-  @doc = "Manage EMC VNX storage pools."
+begin
+  require 'puppet_x/puppetlabs/transport/emc_vnx'
+rescue LoadError => e
+  require 'pathname' # WORK_AROUND #14073 and #7788
+  module_lib = Pathname.new(__FILE__).parent.parent.parent
+  puts "MODULE LIB IS #{module_lib}"
+  require File.join module_lib, 'puppet_x/puppetlabs/transport/emc_vnx'
+end
 
-  ensurable
+Puppet::Type.type(:vnx_storagepool).provide(:vnx_storagepool) do
+  include PuppetX::Puppetlabs::Transport::EMCVNX
 
-  newparam(:name, :namevar => true) do
-    desc "The storage pool name."
-    isnamevar
-    validate do |value|
-      fail("Storage group name cannot exceed 64 characters") unless value.length <= 64
-    end
+  desc "Manages VNX Storage Pools."
+
+  mk_resource_property_methods
+
+  def initialize *args
+    super
+    @property_flush = {}
   end
 
-  newproperty(:disks, :array_matching => :all) do
-    desc "The disks to add to the storage pool."
-    validate do |*value|
-      fail ("Invalid format for disks") unless value.all?{|v| v =~ /\A\d+\_\d+\_\d+\z/}
-    end
-
-    def insync? is
-      is.sort == should.sort
-    end
+  def get_current_properties
+    storagepool = run(["storagepool", "-list", "-name", resource[:name]])
+    self.class.get_storagepool_properties(storagepool)
   end
 
-  
-  newproperty(:raid_type) do
-    desc "The RAID type for the pool."
-    munge do |value|
-      if %w[r_5 r_6 R_10].include? value
-        value.to_sym
-      else
-        value
+  def self.get_storagepool_properties storagepool
+    sp_info = { :ensure => :present }
+    sp_lines = storagepool.split("\n")
+    while line = sp_lines.shift
+      if line.start_with?('Pool Name:')
+        sp_name = line.gsub("Pool Name:", '').strip
+        sp_info[:name] = sp_name
+      end
+
+      if line.start_with?('Pool ID:')
+        value = line.gsub("Pool ID:", '').strip
+        sp_info[:pool_id] = value
+      end
+
+      if line.start_with?('Raid Type:')
+        value = line.gsub("Raid Type:", '').strip
+        sp_info[:raid_type] = value
+      end
+
+      if line.start_with?('Percent Full Threshold:')
+        value = line.gsub("Percent Full Threshold:", '').strip
+        sp_info[:percent_full_threshold] = value
+      end
+
+      if line.start_with?('Description:')
+        value = line.gsub("Description:", '').strip
+        sp_info[:description] = value
+      end
+
+      if line.start_with?('Disk Type:')
+        value = line.gsub("Disk Type:", '').strip
+        sp_info[:disk_type] = value
+      end
+
+      if line.start_with?('State:')
+        value = line.gsub("State:", '').strip
+        sp_info[:state] = value.downcase.to_sym
+      end
+
+      if line.start_with?('Status:')
+        value = line.gsub("Status:", '').strip
+        sp_info[:status] = value
+      end
+
+      if line.start_with?('Current Operation:')
+        value = line.gsub("Current Operation:", '').strip
+        sp_info[:current_operation] = value
+      end
+
+      if line.start_with?('Current Operation State:')
+        value = line.gsub("Current Operation State:", '').strip
+        sp_info[:current_operation_state] = value
+      end
+
+      if line.start_with?('Current Operation Status:')
+        value = line.gsub("Current Operation Status:", '').strip
+        sp_info[:current_operation_status] = value
+      end
+
+      if line.start_with?('Current Operation Percent Completed:')
+        value = line.gsub("Current Operation Percent Completed:", '').strip
+        sp_info[:current_operation_percent_completed] = value
+      end
+
+      if (pattern = 'Raw Capacity (Blocks):') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:raw_capacity_blocks] = value
+        next
+      end
+
+      if (pattern = 'Raw Capacity (GBs):') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:raw_capacity_gbs] = value
+        next
+      end
+
+      if (pattern = 'User Capacity (Blocks):') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:user_capacity_blocks] = value
+        next
+      end
+
+      if (pattern = 'User Capacity (GBs):') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:user_capacity_gbs] = value
+        next
+      end
+
+      if (pattern = 'Consumed Capacity (Blocks):') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:consumed_capacity_blocks] = value
+        next
+      end
+
+      if (pattern = 'Consumed Capacity (GBs):') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:consumed_capacity_gbs] = value
+        next
+      end
+
+      if (pattern = 'Available Capacity (Blocks):') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:available_capacity_blocks] = value
+        next
+      end
+
+      if (pattern = 'Available Capacity (GBs):') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:available_capacity_gbs] = value
+        next
+      end
+
+      if (pattern = 'Percent Full:') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:percent_full] = value
+        next
+      end
+
+      if (pattern = 'Total Subscribed Capacity (Blocks):') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:total_subscribed_capacity_blocks] = value
+        next
+      end
+
+      if (pattern = 'Total Subscribed Capacity (GBs):') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:total_subscribed_capacity_gbs] = value
+        next
+      end
+
+      if (pattern = 'Percent Subscribed:') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:percent_subscribed] = value
+        next
+      end
+
+      if (pattern = 'Oversubscribed by (Blocks):') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:oversubscribed_by_blocks] = value
+        next
+      end
+
+      if (pattern = 'Oversubscribed by (GBs):') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:oversubscribed_by_gbs] = value
+        next
+      end
+
+      if (pattern = 'Disks:') && line.start_with?(pattern)
+        disks = []
+        while /Bus (\d+) Enclosure (\d+) Disk (\d+)/ =~ sp_lines.first
+          sp_lines.shift
+          disks << "#{$1}_#{$2}_#{$3}"
+        end
+        sp_info[:disks] = disks
+        next
+      end
+
+      if (pattern = 'LUNs:') && line.start_with?(pattern)
+        value = line.gsub(pattern, '').strip
+        sp_info[:luns] = value.split(",").map{|v| v.strip.to_i}
+        next
       end
     end
-    newvalues(:r_5, :r_6, :r_10)
+    sp_info
   end
 
-  newparam(:rdrive_count) do
-    desc "The RAID drive count used to create internal RAID groups"
-  end
+  # def self.instances
+  #   storage_pools=[]
+  #   output_lines = run(["storagepool", "-list"]).split("\n\n")
+  #   output_lines.each do |line_info|
+  #     storage_pools << new(get_storagepool_properties line_info)
+  #   end
+  #   storage_pools
+  # end
+  #
+  # def self.prefetch(resources)
+  #   vnx_storagepool = instances
+  #   resources.keys.each do |name|
+  #     if provider = vnx_storagepool.find{ |storagepool| storagepool.name == name }
+  #       resources[name].provider = provider
+  #     end
+  #   end
+  # end
 
-  newproperty(:description) do
-    desc "The storage pool description"
-    validate do |value|
-      fail("Description must be between 0 and 255 characters") unless value.length > 0 and value.length <=255
-    end
-  end
+  def set_storagepool
+    run ["storagepool", "-cancelExpand", "-name", resource[:name]] if resource[:cancel_expand] == :true
+    # raise error if resource disks less than current
+    raise ArgumentError, "can't remove storagepool disks\ncurrent disks:#{current_properties[:disks]}\nchange to:#{resource[:disks]}" if resource[:disks] && !(current_properties[:disks] - resource[:disks]).empty?
 
-  newproperty(:percent_full_threshold) do
-    desc "The percent full before alerts are generated"
-    validate do |value|
-      fail("Non-integer value specified") unless value.is_a? Integer
-      fail("Invalid percent value") unless value >=1 and value <=84
-    end
-  end
-
-  newparam(:skip_rules) do
-    desc "Allows skipping rule checking when creating pools"
-    newvalues(:true, :false)
-  end
-
-  newparam(:auto_tiering) do
-    desc "Sets the auto tiering schedule"
-    newvalues(:manual, :scheduled)
-  end
-
-  newparam(:ensure_fastcache) do
-    desc "Enables or disables FAST Cache for the pool"
-    newvalues(:true, :false)
-  end
-
-  newparam(:snappool_fullthreshold) do
-    desc "Enables or disables checking HWM for auto delete"
-    munge do |value|
-      if %w[enabled disabled].include? value.downcase
-        values.downcase.to_sym
-      else
-        value
+    # run expand
+    args = ["storagepool", "-expand", "-name", resource[:name]]
+    origin_length = args.length + 1
+    if @property_flush[:raid_type]
+      args << "-rtype" << resource[:raid_type]
+      if resource[:rdrive_count]
+        args << "-rdrivecount" << resource[:rdrive_count]
       end
     end
-    newvalues(:enabled, :disabled)
-  end
+    if @property_flush[:disks] && ((resource[:disks] || []).sort != (@property_hash[:disks] || []).sort)
+      args << "-disks"
+      args += (resource[:disks] - @property_hash[:disks])
+    end
+    args << "-initialverify" if resource[:initialverify] == :true
+    args << "-skipRules" if resource[:skip_rules] == :true
+    args << "-o"
+    run(args) if args.length > origin_length
 
-  newparam(:snappool_hwm) do
-    desc "The pool full HWM that triggers auto delete"
-    validate do |value|
-      fail("Invalid value for Snap Pool Full HWM") unless value.is_a? Integer and value > 0 and value < 100
+    # run modify
+    args = ["storagepool", "-modify", "-name", resource[:name]]
+    origin_length = args.length + 1
+    args << "-newName" << resource[:new_name] if resource[:new_name] && (resource[:new_name] != resource[:name])
+    args << "-description" << resource[:description] if @property_flush[:description]
+    args << "-prcntFullThreshold" << resource[:percent_full_threshold] if @property_flush[:percent_full_threshold]
+    args << "-autoTiering" << resource[:auto_tiering] if @property_flush[:auto_tiering]
+    args << "-fastcache" << (resource[:ensure_fastcache] == :true ? "on" : "off") if @property_flush[:ensure_fastcache]
+    args << "-snapPoolFullThresholdEnabled" << (resource[:snappool_fullthreshold] == :enabled ? "on" : "off") if @property_flush[:snappool_fullthreshold]
+    args << "-snapPoolFullHWM" << resource[:snappool_hwm] if @property_flush[:snappool_hwm]
+    args << "-snapPoolFullLWM" << resource[:snappool_lwm] if @property_flush[:snappool_lwm]
+    args << "-snapSpaceUsedThresholdEnabled" << (resource[:snapspace_threshold] == :enabled ? "on" : "off") if @property_flush[:snapspace_threshold]
+    args << "-snapSpaceUsedHWM" << resource[:snapspace_hwm] if @property_flush[:snapspace_hwm]
+    args << "-snapSpaceUsedLWM" << resource[:snapspace_lwm] if @property_flush[:snapspace_lwm]
+
+    args << "-o"
+    if args.length > origin_length
+      run(args)
+      resource[:name] = resource[:new_name] if resource[:new_name]
     end
   end
 
-  newparam(:snappool_lwm) do
-    desc "The pool full LWM that stops auto delete"
-    validate do |value|
-      fail("Invalid value for Snap Pool Full LWM") unless value.is_a? Integer and value > 0 and value < 100
+  def create_storagepool
+    create_pool = ["storagepool", "-create", "-name", resource[:name], "-disks", *resource[:disks]]
+    create_pool << "-rtype" << resource[:raid_type] if resource[:raid_type]
+    create_pool << "-rdrivecount" << resource[:rdrive_count] if resource[:rdrive_count]
+    create_pool << "-description" << resource[:description] if resource[:description]
+    create_pool << "-prcntFullThreshold" << resource[:percent_full_threshold] if resource[:percent_full_threshold]
+    create_pool << "-skipRules" if resource[:skip_rules] == :true
+    create_pool << "-autoTiering" << resource[:auto_tiering] if resource[:auto_tiering]
+    create_pool << "-fastcache" << "on" if resource[:ensure_fastcache] == :true
+    create_pool << "-fastcache" << "off" if resource[:ensure_fastcache] == :false
+    create_pool << "--snapPoolFullThresholdEnabled" << "on" if resource[:snappool_fullthreshold] == :enabled
+    create_pool << "--snapPoolFullThresholdEnabled" << "off" if resource[:snappool_fullthreshold] == :disabled
+    create_pool << "-snapPoolFullHWM" << resource[:snappool_hwm] if resource[:snappool_hwm]
+    create_pool << "-snapPoolFullLWM" << resource[:snappool_lwm] if resource[:snappool_lwm]
+    create_pool << "-snapSpaceUsedThresholdEnabled" << "on" if resource[:snapspace_threshold] == :enabled
+    create_pool << "-snapSpaceUsedThresholdEnabled" << "off" if resource[:snapspace_threshold] == :disabled
+    create_pool << "-snapSpaceUsedHWM" << resource[:snapspace_hwm] if resource[:snapspace_hwm]
+    create_pool << "-snapSpaceUsedLWM" << resource[:snapspace_lwm] if resource[:snapspace_lwm]
+    create_pool << "-initialverify" << "yes" if resource[:initialverify] == :true
+    create_pool << "-initialverify" << "no" if resource[:initialverify] == :false
+
+    run(create_pool)
+    @property_hash[:ensure] = :present
+  end
+
+  def create
+    @property_flush[:ensure] = :present
+  end
+
+  def flush
+    # destroy
+    if @property_flush[:ensure] == :absent
+      # destroy lun first
+      @property_hash[:luns].each do |lun|
+        args = ["lun", "-destroy", "-l", lun, "-o"]
+        run args
+      end
+      run(["storagepool", "-destroy", "-name", resource[:name], "-o"])
+      @property_hash[:ensure] = :absent
+      return
+    end
+
+    if exists?
+      set_storagepool
+    else
+      create_storagepool
     end
   end
 
-  newparam(:snapspace_threshold) do
-    desc "Check snapshot space for HWM for auto delete"
-    newvalues(:enabled, :disabled)
+  def destroy
+    @property_flush[:ensure] = :absent
   end
 
-  newparam(:snapspace_hwm) do
-    desc "Snapshot space used HWM that triggers auto delete"
-    validate do |value|
-      fail("Invalid value for Snap Space Used HWM") unless value.is_a? Integer and value > 0 and value < 100
-    end
+  def exists?
+    current_properties[:ensure] == :present
   end
-
-  newparam(:snapspace_lwm) do
-    desc "Snapshot space LWM which stops auto delete"
-    validate do |value|
-      fail("Invalid value for Snap Space Used LWM") unless value.is_a? Integer and value > 0 and value < 100
-    end
-  end
-
-  newparam(:initialverify) do
-    desc "Specify whether initial verify is run on pool creation or expansion"
-    newvalues(:true, :false)
-  end
-
-  newproperty(:cancel_expand) do
-    desc "cancel expand"
-
-    defaultto :false
-    newvalues(:true, :false)
-  end
-
-  newproperty(:new_name) do
-    desc "The new storage pool name."
-
-    validate do |value|
-      fail("Storage group name cannot exceed 64 characters") unless value.length <= 64
-    end
-  end
-
-  #=================================read-only values=====================
-
-  newproperty(:pool_id) do
-     validate do
-      fail "pool_id is read-only"
-    end
-  end
-
-  newproperty(:disk_type) do
-    desc "Disk Type"
-
-    validate do
-      fail "disk_type is read-only"
-    end
-  end
-
-  newproperty(:state) do
-    desc "State"
-
-    validate do
-      fail "state is read-only"
-    end
-  end
-
-  newproperty(:status) do
-    desc "Status"
-
-    validate do
-      fail "status is read-only"
-    end
-  end
-
-  newproperty(:current_operation) do
-    desc "Current Operation"
-
-    validate do
-      fail "current_operation is read-only"
-    end
-  end
-
-  newproperty(:current_operation_state) do
-    desc "Current Operation State"
-
-    validate do
-      fail "current_operation_state is read-only"
-    end
-  end
-
-  newproperty(:current_operation_status) do
-    desc "Current Operation Status"
-
-    validate do
-      fail "current_operation_status is read-only"
-    end
-  end
-
-  newproperty(:current_operation_percent_completed) do
-    desc "Current Operation Status Completed"
-
-    validate do
-      fail "current_operation_percent_completed is read-only"
-    end
-  end
-
-  newproperty(:raw_capacity_blocks) do
-    desc "Raw Capacity (Blocks)"
-
-    validate do
-      fail "raw_capacity_blocks is read-only"
-    end
-  end
-
-  newproperty(:raw_capacity_gbs) do
-    desc "Raw Capacity (GBs)"
-
-    validate do
-      fail "raw_capacity_gbs is read-only"
-    end
-  end
-
-  newproperty(:user_capacity_blocks) do
-    desc "User Capacity (Blocks)"
-    validate do
-      fail "user_capacity_blocks is read-only"
-    end
-  end
-
-  newproperty(:user_capacity_gbs) do
-    desc "User Capacity (GBs)"
-    validate do
-      fail "user_capacity_gbs is read-only"
-    end
-  end
-
-  newproperty(:consumed_capacity_blocks) do
-    desc "Consumed Capacity (Blocks)"
-    validate do
-      fail "consumed_capacity_blocks is read-only"
-    end
-  end
-
-  newproperty(:consumed_capacity_gbs) do
-    desc "Consumed Capacity (GBs)"
-    validate do
-      fail "consumed_capacity_gbs is read-only"
-    end
-  end
-
-  newproperty(:available_capacity_blocks) do
-    desc "Available Capacity (Blocks)"
-    validate do
-      fail "available_capacity_blocks is read-only"
-    end
-  end
-
-  newproperty(:available_capacity_gbs) do
-    desc "Available Capacity (GBs)"
-    validate do
-      fail "available_capacity_gbs is read-only"
-    end
-  end
-
-  newproperty(:percent_full) do
-    desc "Percent Full"
-    validate do
-      fail "percent_full is read-only"
-    end
-  end
-
-  newproperty(:total_subscribed_capacity_blocks) do
-    desc "Total Subscribed Capacity (Blocks)"
-    validate do
-      fail "total_subscribed_capacity_blocks is read-only"
-    end
-  end
-
-  newproperty(:total_subscribed_capacity_gbs) do
-    desc "Total Subscribed Capacity (GBs)"
-    validate do
-      fail "total_subscribed_capacity_gbs is read-only"
-    end
-  end
-
-  newproperty(:percent_subscribed) do
-    desc "Percent Subscribed"
-    validate do
-      fail "percent_subscribed is read-only"
-    end
-  end
-
-  newproperty(:oversubscribed_by_blocks) do
-    desc "Oversubscribed by (Blocks)"
-    validate do
-      fail "oversubscribed_by_blocks is read-only"
-    end
-  end
-
-  newproperty(:oversubscribed_by_gbs) do
-    desc "Oversubscribed by (GBs)"
-    validate do
-      fail "oversubscribed_by_gbs is read-only"
-    end
-  end
-
-  newproperty(:luns, :array_matching => :all) do
-    desc "LUNs"
-
-    validate do
-      fail "luns is read-only"
-    end
-  end
-
 end
