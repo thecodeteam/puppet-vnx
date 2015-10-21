@@ -1,7 +1,11 @@
 Puppet::Type.newtype(:vnx_fastcache) do
   @doc = "Manage EMC VNX FAST cache settings."
 
-  #ensurable
+  ensurable
+
+  newparam(:name, :namevar => true) do
+    desc "Fast Cache Name"
+  end
 
   newparam(:cache_mode) do
     desc "Cache mode, can be rw or ro"
@@ -15,7 +19,7 @@ Puppet::Type.newtype(:vnx_fastcache) do
   end
 
 
-  newproperty(:disks, :namevar => true, :array_matching => :all) do
+  newproperty(:disks, :array_matching => :all) do
     desc "The VNX disks to be used for FAST Cache.
       Disks must be specified in an array."
     # Build up list of disks available for FAST Cache

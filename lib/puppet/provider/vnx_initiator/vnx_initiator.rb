@@ -28,7 +28,7 @@ Puppet::Type.type(:vnx_initiator).provide(:vnx_initiator) do
       hba_info, hba_ports = line_info.split "Information about each port of this HBA:\n\n"
       hba_info.split("\n").each do |line|
         if (pattern = 'HBA UID:') && line.start_with?(pattern)
-          initiator_info[:name] = line.sub(pattern, '').strip
+          initiator_info[:hba_uid] = line.sub(pattern, '').strip
           next
         end
 
@@ -76,47 +76,65 @@ Puppet::Type.type(:vnx_initiator).provide(:vnx_initiator) do
   end
 
   def exists?
-    get_instances.find{|initiator| initiator[:name] == resource[:name]}
+    get_instances.find{|initiator| initiator[:hba_uid] == resource[:hba_uid]}
   end
 
   def set_initiator
     resource[:ports].each do |port|
       if port["storage_group"]
         gname = port["storage_group"]
-      else
-        gname = create_temp_storage_group
+      #else
+      #  gname = create_temp_storage_group
       end
 
       begin
         #debug "Try to create #{resource[:name]} #{resource[:ip_address]}, #{resource[:hostname]} on #{port[:storagegroup]} #{port[:so]} #{port[:sp_port]}"
-        command = ["storagegroup", "-setpath", "-hbauid", resource[:name], "-gname", gname, "-sp", port["sp"], "-spport", port["sp_port"].to_s, "-ip", resource[:ip_address], "-host", resource[:hostname] ]
-        command += ["-failovermode", "4", "-arraycommpath", "1", "-o"]
+        command = ["storagegroup", "-setpath", "-hbauid", resource[:hba_uid], "-sp", port["sp"], "-spport", port["sp_port"].to_s, "-o"]
+        if resource[:ip_address] != nil
+        	command += ["-ip",resource[:ip_address]]
+        end
+        
+        if resource[:hostname] != nil
+        	command +=["-host",resource[:hostname]]
+        end
+        
+		if resource[:failovermode] != nil
+			command +=["-failovermode", resource[:failovermode]]
+		end
+		
+		if resource[:arraycommpath] != nil
+			command +=["-arraycommpath", resource[:arraycommpath]]
+		end
+		
+        if gname != nil
+        	command += ["-gname", gname] 
+        end
         run(command)
       ensure
-        destroy_temp_storage_group(resource[:hostname], gname) unless port["storage_group"]
+        #destroy_temp_storage_group(resource[:hostname], gname) unless port["storage_group"]
       end
     end
     @property_hash[:ensure] = :present
   end
 
-  def create_temp_storage_group
+ # def create_temp_storage_group
     #create a temporary storage group for registering a new initiator 
-    gname = "TmpSG" + Time.now.to_i.to_s
-    pre_command = ["storagegroup", "-create", "-gname", gname]
-    run(pre_command)
-    gname
-  end
+ #   gname = "TmpSG" + Time.now.to_i.to_s
+ #   pre_command = ["storagegroup", "-create", "-gname", gname]
+ #   run(pre_command)
+ #   gname
+ # end
 
-  def destroy_temp_storage_group(hostname, gname)
-    #destroy temporary storage group
-    begin
-      post_command = ["storagegroup", "-disconnecthost", "-host", hostname, "-gname", gname, "-o"]
-      run(post_command)
-    ensure
-      post_command = ["storagegroup", "-destroy", "-gname", gname, "-o"]
-      run(post_command)
-    end
-  end
+ # def destroy_temp_storage_group(hostname, gname)
+ #   #destroy temporary storage group
+ #   begin
+ #     post_command = ["storagegroup", "-disconnecthost", "-host", hostname, "-gname", gname, "-o"]
+ #     run(post_command)
+ #   ensure
+ #     post_command = ["storagegroup", "-destroy", "-gname", gname, "-o"]
+ #     run(post_command)
+ #   end
+ # end
 
   def create
     @property_flush[:ensure] = :present
@@ -128,7 +146,7 @@ Puppet::Type.type(:vnx_initiator).provide(:vnx_initiator) do
 
   def flush
     if @property_flush[:ensure] == :absent
-      run(["port", "-removeHBA", "-o", "-hbauid", resource[:name]])
+      run(["port", "-removeHBA", "-o", "-hbauid", resource[:hba_uid]])
     else
       set_initiator
     end
