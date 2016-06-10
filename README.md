@@ -42,7 +42,6 @@ Contact
 -------
 jie.bao@emc.com
 layne.peng@emc.com
-grissom.wang@emc.com
 
 
 Support
