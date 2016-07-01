@@ -1,6 +1,10 @@
 #Puppet VNX Module
 Puppet VNX module wraps Naviseccli into Puppet module to simplify the configuration of VNX Initiator, DNS, Storage Pool, Hot Spare, Storage Group, LUN, Fast Cache, NTP, Domain, SP and Array.
 
+CI Status
+---------
+[![Build Status](https://travis-ci.org/mterzo/puppet-vnx.svg?branch=travis_ci)](https://travis-ci.org/mterzo/puppet-vnx)
+
 Prepare
 -------
 Download and install Navisphere CLI
