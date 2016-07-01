@@ -5,6 +5,11 @@ CI Status
 ---------
 [![Build Status](https://travis-ci.org/mterzo/puppet-vnx.svg?branch=travis_ci)](https://travis-ci.org/mterzo/puppet-vnx)
 
+Prerequisite
+-------
+Ruby >= 1.9.3
+RubyGem >= 3.6.0
+
 Prepare
 -------
 Download and install Navisphere CLI
