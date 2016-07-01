@@ -34,21 +34,21 @@ Puppet::Type.newtype(:vnx_iscsiport) do
   newparam(:address) do 
     desc "THe IP Address of the SP Port"
     validate do |value|
-      fail("#{value} is not a valid IPv4 address") unless unless IPAddr.new(value).ipv4?
+      fail("#{value} is not a valid IPv4 address") unless IPAddr.new(value).ipv4?
     end
   end
 
   newparam(:subnetmask) do 
     desc "The Subnet Mask for the SP Port"
     validate do |value|
-      fail("#{value} is not a valid Subnet") unless unless IPAddr.new(value).ipv4?
+      fail("#{value} is not a valid Subnet") unless IPAddr.new(value).ipv4?
     end
   end
 
   newparam(:gateway) do
     desc "The gateway address for the SP Port"
     validate do |value|
-      fail("#{value} is not a valid Gateway address") unless unless IPAddr.new(value).ipv4?
+      fail("#{value} is not a valid Gateway address") unless IPAddr.new(value).ipv4?
     end
   end
 

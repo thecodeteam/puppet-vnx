@@ -9,7 +9,7 @@ Puppet::Type.newtype(:vnx_analyzer) do
   newparam(:ensure_started) do
     desc "Controls starting and stopping the analyzer"
     defaultto :true
-    newvalues (:true, :false)
+    newvalues(:true, :false)
   end
 
   newparam(:nar_interval) do
@@ -31,7 +31,7 @@ Puppet::Type.newtype(:vnx_analyzer) do
   newparam(:non_stop) do
     desc "Sets performance logging to non_stop"
     defaultto :false
-    newvalues (:true, :false)
+    newvalues(:true, :false)
   end
 
   newparam(:log_period) do

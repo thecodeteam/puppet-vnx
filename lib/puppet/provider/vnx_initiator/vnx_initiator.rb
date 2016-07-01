@@ -27,17 +27,17 @@ Puppet::Type.type(:vnx_initiator).provide(:vnx_initiator) do
     	initiator_info = {}
       hba_info, hba_ports = line_info.split "Information about each port of this HBA:\n\n"
       hba_info.split("\n").each do |line|
-        if (pattern = 'HBA UID:') && line.start_with?(pattern)
+        if (pattern == 'HBA UID:') && line.start_with?(pattern)
           initiator_info[:hba_uid] = line.sub(pattern, '').strip
           next
         end
 
-        if (pattern = 'Server Name:') && line.start_with?(pattern)
+        if (pattern == 'Server Name:') && line.start_with?(pattern)
           initiator_info[:hostname] = line.sub(pattern, '').strip
           next
         end
 
-        if (pattern = 'Server IP Address:') && line.start_with?(pattern)
+        if (pattern == 'Server IP Address:') && line.start_with?(pattern)
           initiator_info[:ip_address] = line.sub(pattern, '').strip
           initiator_info[:ip_address] = nil if initiator_info[:ip_address] == "UNKNOWN"
           next
@@ -50,17 +50,17 @@ Puppet::Type.type(:vnx_initiator).provide(:vnx_initiator) do
         port_info.split("\n").each do |line|
           line.strip!
 
-          if (pattern = 'SP Name:') && line.start_with?(pattern)
+          if (pattern == 'SP Name:') && line.start_with?(pattern)
             port[:sp] = (line.sub(pattern, '').strip == "SP A" ? :a : :b)
             next
           end
 
-          if (pattern = 'SP Port ID:') && line.start_with?(pattern)
+          if (pattern == 'SP Port ID:') && line.start_with?(pattern)
             port[:sp_port] = line.sub(pattern, '').strip.to_i
             next
           end
 
-          if (pattern = 'StorageGroup Name:') && line.start_with?(pattern)
+          if (pattern == 'StorageGroup Name:') && line.start_with?(pattern)
             port[:storage_group_name] = line.sub(pattern, '').strip
             next
           end

@@ -33,8 +33,8 @@ Puppet::Type.type(:vnx_dns).provide(:vnx_dns) do
   end
     
   def create
-    set_dns = "-networkadmin", "-dns", "-set" resource[:name] 
-    set_dns << "-nameserver" << resource[:name_servers] if resource [:name_servers]
+    set_dns = "-networkadmin", "-dns", "-set", resource[:name]
+    set_dns << "-nameserver" << resource[:name_servers] if resource[:name_servers]
     set_dns << "-searchlist" << resource[:search_list] if resource[:search_list]
     set_dns << "-o"
     run(set_dns)

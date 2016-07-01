@@ -34,7 +34,7 @@ Puppet::Type.newtype(:vnx_ldap) do
     desc "The login for LDAP/AD"
     validate do |value|
       fail("Login cannot exceed 512 characters") if value.length > 512
-      fail("Invalid format for LDAP Login") unless value =/^cn=\w+,ou=\w+,dc=\w+,dc=\w+$/
+      fail("Invalid format for LDAP Login") unless value =~/^cn=\w+,ou=\w+,dc=\w+,dc=\w+$/
     end
   end
 
@@ -67,14 +67,14 @@ Puppet::Type.newtype(:vnx_ldap) do
   end
 
   newparam(:user_name_attribute) do
-    desc "The attribute to which the user’s common name (cn) will be appended in the servers"
+    desc "The attribute to which the user's common name (cn) will be appended in the servers"
     validate do |value|
       fail("Invalid user_name_attribute") if value.length > 128
     end
   end
 
   newparam(:group_name_attribute) do
-    desc "The attribute to which the user group’s common name will be appended in the servers"
+    desc "The attribute to which the user group's common name will be appended in the servers"
     validate do |value| 
       fail("Invalid group_name_attribute") if value.length > 128
     end
