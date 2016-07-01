@@ -74,7 +74,7 @@ Puppet::Type.newtype(:vnx_ldap) do
   end
 
   newparam(:group_name_attribute) do
-    desc "The attribute to which the user group’s common name will be appended in the servers"
+    desc "The attribute to which the user group's common name will be appended in the servers"
     validate do |value| 
       fail("Invalid group_name_attribute") if value.length > 128
     end
