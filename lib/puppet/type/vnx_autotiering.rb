@@ -12,7 +12,7 @@ Puppet::Type.newtype(:vnx_autotiering) do
   newparam(:ensure_enabled) do
     desc "Controls the enabling and disabling of autotiering"
     defaultto :false
-    newvalues (:false, :true)
+    newvalues(:false, :true)
   end
 
   newparam(:time) do
@@ -22,6 +22,7 @@ Puppet::Type.newtype(:vnx_autotiering) do
     validate do |value|
       fail("Invalid Time specificiation") unless value =~/^([01]?[0-9]|2[0-3]):[0-5][0-9]/
     end
+  end
       
   newparam(:duration) do
     desc "The duration for a manual relocation."

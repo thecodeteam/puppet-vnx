@@ -40,7 +40,7 @@ Puppet::Type.newtype(:vnx_domain) do
   validate do 
     if self[:old_scope] or self[:old_password] or self[:old_user]
       fail("Must specify user, password and scope together") unless self[:old_scope] and self[:old_password] and self[:old_user]
+    end
   end
-
 
 end

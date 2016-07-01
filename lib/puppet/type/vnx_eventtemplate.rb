@@ -16,7 +16,7 @@ Puppet::Type.newtype(:vnx_eventtemplate) do
   end
 
   newparam(:file_path) do 
-    desc "The File path for exported templates")
+    desc "The File path for exported templates"
     validate do |value|
       fail("Invalid file path specifed for export") unless File.directory?(value)
     end

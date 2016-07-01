@@ -34,7 +34,7 @@ Puppet::Type.newtype(:vnx_ldap) do
     desc "The login for LDAP/AD"
     validate do |value|
       fail("Login cannot exceed 512 characters") if value.length > 512
-      fail("Invalid format for LDAP Login") unless value =/^cn=\w+,ou=\w+,dc=\w+,dc=\w+$/
+      fail("Invalid format for LDAP Login") unless value =~/^cn=\w+,ou=\w+,dc=\w+,dc=\w+$/
     end
   end
 

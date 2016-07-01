@@ -27,7 +27,7 @@ Puppet::Type.type(:vnx_fastcache).provide(:vnx_fastcache) do
   def self.get_fastcache_properties fast_info
     fast = {}
     fast_info.split("\n").each do |line|
-		if (pattern = "Mode:") && line.start_with?(pattern)
+		if (pattern == "Mode:") && line.start_with?(pattern)
         	fast[:Mode] = line.sub(pattern, "").strip
         	#puts "wzz Debug: fastMode is #{fast[:Mode]}"
       	end
