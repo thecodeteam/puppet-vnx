@@ -3,7 +3,7 @@ Puppet VNX module wraps Naviseccli into Puppet module to simplify the configurat
 
 CI Status
 ---------
-[![Build Status](https://travis-ci.org/mterzo/puppet-vnx.svg?branch=travis_ci)](https://travis-ci.org/mterzo/puppet-vnx)
+[![Build Status](https://api.travis-ci.org/emccode/puppet-vnx.svg?branch=master)](https://travis-ci.org/emccode/puppet-vnx)
 
 Prerequisite
 -------
