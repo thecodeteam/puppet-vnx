@@ -13,6 +13,7 @@ Puppet::Type.newtype(:vnx_storagepool) do
 
   newproperty(:disks, :array_matching => :all) do
     desc "The disks to add to the storage pool."
+
     validate do |*value|
       fail ("Invalid format for disks") unless value.all?{|v| v =~ /\A\d+\_\d+\_\d+\z/}
     end
@@ -20,6 +21,7 @@ Puppet::Type.newtype(:vnx_storagepool) do
     def insync? is
       is.sort == should.sort
     end
+
   end
 
   
@@ -46,7 +48,7 @@ Puppet::Type.newtype(:vnx_storagepool) do
     end
   end
 
-  newproperty(:percent_full_threshhold) do
+  newproperty(:percent_full_threshold) do
     desc "The percent full before alerts are generated"
     validate do |value|
       fail("Non-integer value specified") unless value.is_a? Integer

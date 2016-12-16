@@ -7,8 +7,106 @@ Puppet::Type.newtype(:vnx_storagegroup) do
   newparam(:name, :namevar => true) do
     desc "Storage group name."
 
+#    validate do |value|
+#      fail("Invalid Storage group name length") unless value.length <= 128 and value.length > 0
+#    end
+  end
+
+  newparam(:sg_name) do
+    desc "Storage group name."
+
     validate do |value|
       fail("Invalid Storage group name length") unless value.length <= 64 and value.length > 0
+    end
+  end
+
+  newproperty(:hbauid) do
+    desc "The HBA UID for an Initiator"
+
+    validate do |value|
+      fail("Invalid Storage group name length") unless value.length <= 64 and value.length > 0
+    end
+  end
+
+  newproperty(:sp) do
+    desc "Owner SP."
+
+    validate do |value|
+      fail("Invalid Storage group name length") unless value.length <= 64 and value.length > 0
+    end
+  end
+
+  newproperty(:sp_port) do
+    desc "Owner SP."
+
+    validate do |value|
+      fail("Invalid Storage group name length") unless value.length <= 64 and value.length > 0
+    end
+  end
+
+  newproperty(:initiator_type) do
+    desc "Owner SP."
+
+    validate do |value|
+      fail("Invalid Storage group name length") unless value.length <= 64 and value.length > 0
+    end
+  end
+
+  newproperty(:ip_address) do
+    desc "The IP address of virtual machine"
+    validate do |value|
+      fail("#{value} is not a valid IPv4 address") unless value.nil? || IPAddr.new(value).ipv4?
+    end
+  end
+
+  newproperty(:hostname) do
+    desc "Owner SP."
+
+    validate do |value|
+      fail("Invalid Storage group name length") unless value.length <= 64 and value.length > 0
+    end
+  end
+
+  newproperty(:failover_mode) do
+    desc "Owner SP."
+
+    validate do |value|
+      fail("Invalid Storage group name length") unless value.length <= 64 and value.length > 0
+    end
+  end
+
+  newproperty(:array_commpath) do
+    desc "Owner SP."
+
+    validate do |value|
+      fail("Invalid Storage group name length") unless value.length <= 64 and value.length > 0
+    end
+  end
+
+  newproperty(:unit_serialnumber) do
+    desc "Owner SP."
+
+    validate do |value|
+      fail("Invalid Storage group name length") unless value.length <= 64 and value.length > 0
+    end
+  end
+
+  newproperty(:setpathonly) do
+    desc "addonly only used when you don't want to move anything from storagegroup"
+    newvalues(:true, :false)
+  end
+
+
+  newproperty(:addonly) do
+    desc "addonly only used when you don't want to move anything from storagegroup"
+    newvalues(:true, :false)
+  end
+
+  newproperty(:host_name) do
+    desc "Host name."
+
+    validate do |value|
+      fail("Invalid Host name length") unless value.length <= 64 and value.length > 0
     end
   end
 

@@ -40,7 +40,7 @@ Puppet::Type.type(:vnx_ntp).provide(:vnx_ntp) do
     
   def create
     set_ntp = "-set", "-start", resource[:ensure_running], "-servers", resource[:ntp_servers]
-    set_ntp << "-serverkey", resource[:server_key], "-keyvalue", resource[:keyvalue] if resource[:server_key]
+    set_ntp << ["-serverkey", resource[:server_key], "-keyvalue", resource[:keyvalue]] if resource[:server_key]
     run(set_ntp)
     @property_hash[:ensure] = :present
   end

@@ -36,7 +36,7 @@ Puppet::Type.newtype(:vnx_ntp) do
   newparam(:keyvalue, :array_matching => :all) do
     desc "The NTP keyvalue for authentication."
     validate do |value|
-      fail ("#{value} is not a valid keyvalue for NTP") unless value.length <= 16 and keyval =~ /^[ -~]+$/ and keyval ! =~ /#/
+      fail ("#{value} is not a valid keyvalue for NTP") unless value.length <= 16 and keyval =~ /^[ -~]+$/ and !(keyval =~ /#/)
     end
   end
 

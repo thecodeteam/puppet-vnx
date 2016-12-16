@@ -35,7 +35,7 @@ Puppet::Type.type(:vnx_domain).provide(:vnx_domain) do
     
   def create
     create_domain = "domain", "-add", resource[:name]
-    create_domain << "-olduser", resource[:old_user], "-oldpassword" resource[:old_password], "-oldscope", resource[:old_scope], "-o" if resource[:old_user]
+    create_domain << ["-olduser", resource[:old_user], "-oldpassword", resource[:old_password], "-oldscope", resource[:old_scope], "-o"] if resource[:old_user]
     run(create_domain)
     @property_hash[:ensure] = :present
   end

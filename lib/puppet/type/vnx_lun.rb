@@ -14,6 +14,13 @@ Puppet::Type.newtype(:vnx_lun) do
     end
   end
 
+  newparam(:lun_name) do
+    desc "The LUN name"
+    validate do |value|
+      fail("LUN name cannot exceed 64 characters") unless value.length <= 64
+    end
+  end
+
   newparam(:primary_lun_number) do
     desc "The primary LUN number"
   end
