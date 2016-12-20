@@ -261,6 +261,7 @@ Puppet::Type.type(:vnx_lun).provide(:vnx_lun) do
     else
       args << "-type" << (resource[:type] == :thin ? 'Thin' : 'NonThin') if resource[:type]
       args << "-capacity" << resource[:capacity] if resource[:capacity]
+      args << "-sq" << resource[:size_qual] if resource[:size_qual]
       args << "-poolId" << resource[:pool_id] if resource[:pool_id]
       args << "-poolName" << resource[:pool_name] if resource[:pool_name]
       args << "-sp" << resource[:default_owner].to_s.upcase if resource[:default_owner]
