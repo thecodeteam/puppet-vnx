@@ -246,11 +246,8 @@ Puppet::Type.type(:vnx_storagegroup).provide(:vnx_storagegroup) do
     #change the hosts
     if @property_flush[:host_name]
         #hostname = resource[:host_name]
-        puts "wzz debug: property_flush #{@property_flush[:host_name]}"
-        puts "wzz debug: #{@property_flush[:addonly]}"
         if @property_flush[:addonly] == :true
             args = ["storagegroup", "-connecthost", "-host", resource[:host_name], "-gname", resource[:sg_name], "-o"]
-            puts "wzz debug: running args...#{args}"
             run args
         end
     end
