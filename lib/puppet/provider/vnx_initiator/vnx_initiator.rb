@@ -27,17 +27,18 @@ Puppet::Type.type(:vnx_initiator).provide(:vnx_initiator) do
     	initiator_info = {}
       hba_info, hba_ports = line_info.split "Information about each port of this HBA:\n\n"
       hba_info.split("\n").each do |line|
-        if (pattern == 'HBA UID:') && line.start_with?(pattern)
+        pattern = 'HBA UID:'
+        if line.start_with?(pattern)
           initiator_info[:hba_uid] = line.sub(pattern, '').strip
           next
         end
-
-        if (pattern == 'Server Name:') && line.start_with?(pattern)
+        pattern = 'Server Name:'
+        if line.start_with?(pattern)
           initiator_info[:hostname] = line.sub(pattern, '').strip
           next
         end
-
-        if (pattern == 'Server IP Address:') && line.start_with?(pattern)
+        pattern = 'Server IP Address:'
+        if line.start_with?(pattern)
           initiator_info[:ip_address] = line.sub(pattern, '').strip
           initiator_info[:ip_address] = nil if initiator_info[:ip_address] == "UNKNOWN"
           next
@@ -49,18 +50,18 @@ Puppet::Type.type(:vnx_initiator).provide(:vnx_initiator) do
         port = {}
         port_info.split("\n").each do |line|
           line.strip!
-
-          if (pattern == 'SP Name:') && line.start_with?(pattern)
+          pattern = 'SP Name:'
+          if line.start_with?(pattern)
             port[:sp] = (line.sub(pattern, '').strip == "SP A" ? :a : :b)
             next
           end
-
-          if (pattern == 'SP Port ID:') && line.start_with?(pattern)
+          pattern = 'SP Port ID:'
+          if line.start_with?(pattern)
             port[:sp_port] = line.sub(pattern, '').strip.to_i
             next
           end
-
-          if (pattern == 'StorageGroup Name:') && line.start_with?(pattern)
+          pattern = 'StorageGroup Name:'
+          if line.start_with?(pattern)
             port[:storage_group_name] = line.sub(pattern, '').strip
             next
           end
@@ -93,21 +94,21 @@ Puppet::Type.type(:vnx_initiator).provide(:vnx_initiator) do
         if resource[:ip_address] != nil
         	command += ["-ip",resource[:ip_address]]
         end
-        
+
         if resource[:hostname] != nil
         	command +=["-host",resource[:hostname]]
         end
-        
+
 		if resource[:failovermode] != nil
 			command +=["-failovermode", resource[:failovermode]]
 		end
-		
+
 		if resource[:arraycommpath] != nil
 			command +=["-arraycommpath", resource[:arraycommpath]]
 		end
-		
+
         if gname != nil
-        	command += ["-gname", gname] 
+        	command += ["-gname", gname]
         end
         run(command)
       ensure
@@ -118,7 +119,7 @@ Puppet::Type.type(:vnx_initiator).provide(:vnx_initiator) do
   end
 
  # def create_temp_storage_group
-    #create a temporary storage group for registering a new initiator 
+    #create a temporary storage group for registering a new initiator
  #   gname = "TmpSG" + Time.now.to_i.to_s
  #   pre_command = ["storagegroup", "-create", "-gname", gname]
  #   run(pre_command)
