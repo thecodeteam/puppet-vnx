@@ -4,9 +4,11 @@ bundler_args: --without development
 before_install: rm Gemfile.lock || true
 sudo: false
 rvm:
+  - 2.3.1
+  - 2.2.4
+  - 2.1.9
+  - 2.0.0
   - 1.9.3
-  - 2.1.0
-  - 2.2
 script: "bundle exec rake validate"
 env:
   - PUPPET_GEM_VERSION="~> 3.6.0"
@@ -25,19 +27,27 @@ env:
 matrix:
   fast_finish: true
   exclude:
-    - rvm: 2.2
+    - rvm: 1.9.3
       env: PUPPET_GEM_VERSION="~> 3.6.0"
-    - rvm: 2.2
+    - rvm: 1.9.3
       env: PUPPET_GEM_VERSION="~> 3.6.0" STRICT_VARIABLES=yes
-    - rvm: 2.2
+    - rvm: 1.9.3
       env: PUPPET_GEM_VERSION="~> 3.7.0"
-    - rvm: 2.2
+    - rvm: 1.9.3
       env: PUPPET_GEM_VERSION="~> 3.7.0" STRICT_VARIABLES=yes
-    - rvm: 2.2
+    - rvm: 1.9.3
       env: PUPPET_GEM_VERSION="~> 3.7.0" STRICT_VARIABLES=yes FUTURE_PARSER=yes
-    - rvm: 2.2
+    - rvm: 1.9.3
       env: PUPPET_GEM_VERSION="~> 3.8.0"
-    - rvm: 2.2
+    - rvm: 1.9.3
       env: PUPPET_GEM_VERSION="~> 3.8.0" STRICT_VARIABLES=yes
-    - rvm: 2.2
+    - rvm: 1.9.3
       env: PUPPET_GEM_VERSION="~> 3.8.0" STRICT_VARIABLES=yes FUTURE_PARSER=yes
+    - rvm: 1.9.3
+      env: PUPPET_GEM_VERSION="~> 4.0.0"
+    - rvm: 1.9.3
+      env: PUPPET_GEM_VERSION="~> 4.1.0"
+    - rvm: 1.9.3
+      env: PUPPET_GEM_VERSION="~> 4.2.0"
+    - rvm: 1.9.3
+      env: PUPPET_GEM_VERSION="~> 4.3.0"
